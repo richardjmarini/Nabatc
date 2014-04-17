@@ -52,15 +52,14 @@ class NaiveBaysenClassifier(dict):
 
       del[id]
 
-   def train(self):
+   def train(self, k= 1.0):
 
       for classification in self.keys():
 
          self.term_matrix[classification]= [map(lambda term: self.term_frequency(term, document.tokens),  self.terms) for document in self[classification].values()]
          frequency_sum= sum([sum(vector) for vector in self.term_matrix[classification]])
-         self.classification_matrix[classification]= [sum(vector) / float(frequency_sum + len(self.terms)) for vector in zip(*self.term_matrix[classification])]
+         self.classification_matrix[classification]= [(sum(vector) + 1) / ((frequency_sum + len(self.terms)) * k) for vector in zip(*self.term_matrix[classification])]
          
-         print '>', self.classification_matrix[classification]
 
    @staticmethod
    def term_frequency(term, tokens):
@@ -74,11 +73,11 @@ class NaiveBaysenClassifier(dict):
       document= Document(text, id, additional_stopwords= self.stopwords)
       term_matrix= [self.term_frequency(term, document.tokens) for term in self.terms]
 
-      print self.terms
-      print term_matrix
+      probabilities= [(sum(term_matrix) * reduce(mul, self.classification_matrix[classification]), classification) for classification in self.keys()]
+      (probability, classification)= max(probabilities)
 
-      for classification in self.keys():
-         print reduce(mul, self.classification_matrix[classification])
+      return classification
+
 
 
 if __name__ == '__main__':
@@ -97,5 +96,5 @@ if __name__ == '__main__':
       fh.close()
 
    nbc.train()
-   nbc.classify("Richie drives a truck")
+   print nbc.classify("The sky is blue")
 
