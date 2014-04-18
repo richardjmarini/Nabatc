@@ -1,4 +1,27 @@
 #!/usr/bin/env python
+#---------------------------------------------------------------------------
+#   Author: Richard J. Marini (richardjmarini@gmail.com)
+#   Date: 04/18/2014
+#   Name: Nabatc (Naive Bayes Text Classification)
+#   Description:  A simple Naive Bayes Text Classifier
+#   Development Resources:
+#	http://en.wikipedia.org/wiki/Naive_Bayes_classifier
+#	http://suanpalm3.kmutnb.ac.th/teacher/FileDL/choochart82255418560.pdf
+#
+#   License:
+#      Nabatc is free software: you can redistribute it and/or modify
+#      it under the terms of the GNU General Public License as published by
+#      the Free Software Foundation, either version 2 of the License, or
+#      any later version.
+#
+#      Nabatc is distributed in the hope that it will be useful,
+#      but WITHOUT ANY WARRANTY; without even the implied warranty of
+#      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#      GNU General Public License for more details.
+#
+#      You should have received a copy of the GNU General Public License
+#      along with Nabatc.  If not, see <http://www.gnu.org/licenses/>.
+#---------------------------------------------------------------------------
 
 from itertools import izip, chain
 from nltk import word_tokenize
@@ -28,11 +51,11 @@ class Document(object):
       return repr(self.text)
 
 
-class NaiveBaysenClassifier(dict):
+class NaiveBayesClassifier(dict):
 
    def __init__(self, additional_stopwords= []):
 
-      super(NaiveBaysenClassifier, self).__init__()
+      super(NaiveBayesClassifier, self).__init__()
       self.stopwords= additional_stopwords
 
       self.terms= set()
@@ -40,6 +63,8 @@ class NaiveBaysenClassifier(dict):
       self.classification_matrix= {}
 
    def add(self, text, classification, id= None):
+
+      print classification, text
 
       document= Document(text, id, additional_stopwords= self.stopwords) 
       
@@ -58,7 +83,7 @@ class NaiveBaysenClassifier(dict):
       print 'terms', self.terms
       for classification in self.keys():
 
-         self.term_matrix[classification]= [map(lambda term: self.term_frequency(term, document.tokens),  self.terms) for document in self[classification].values()]
+         self.term_matrix[classification]= [map(lambda term: self.term_frequency(term, document.tokens), self.terms) for document in self[classification].values()]
          frequency_sum= sum([sum(vector) for vector in self.term_matrix[classification]])
          self.classification_matrix[classification]= [(sum(vector) + 1) / float(frequency_sum + len(self.terms)) for vector in zip(*self.term_matrix[classification])]
          
@@ -81,32 +106,4 @@ class NaiveBaysenClassifier(dict):
 
       total_documents= sum([len(documents) for documents in self.values()])
       for classification in self.keys():
-         yield (classification,  (len(self[classification]) / float(total_documents)) * reduce(mul, map(lambda p: pow(*p),  izip(self.classification_matrix[classification], query_matrix))))
-
-
-if __name__ == '__main__':
-
-   from glob import glob
-   from os import path
-
-   nbc= NaiveBaysenClassifier()
-
-   for filename in glob("../documents/*"):
-          
-      classification= path.basename(filename).split(".")[1]
-       
-      fh= open(filename, 'r')
-      data= fh.read()
-      fh.close()
-
-      print classification, data
-
-      nbc.add(data, classification)
-
-   nbc.train()
-
-   query= "The sky had a nice shade of blue"
-   print "query:", query
-   for classification in nbc.classify(query):
-      print classification
-
+         yield (classification,  (len(self[classification]) / float(total_documents)) * reduce(mul, map(lambda p: pow(*p), izip(self.classification_matrix[classification], query_matrix))))
