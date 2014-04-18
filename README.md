@@ -49,7 +49,7 @@ $ cat ../0.txt | ./classify.py
 
 That's about it!
 
-I'd really like to eat some  rice right now. What type of resturant should I goto?
+I'd really like to eat some  rice right now. What type of restaurant should I goto?
 ```
 $ ./classify.py --query="rice"
 
