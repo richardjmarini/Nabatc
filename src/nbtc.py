@@ -6,6 +6,7 @@ from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 from hashlib import md5
 from operator import mul
+from math import pow
 
 class Document(object):
 
@@ -52,14 +53,17 @@ class NaiveBaysenClassifier(dict):
 
       del[id]
 
-   def train(self, k= 1.0):
+   def train(self):
 
+      print 'terms', self.terms
       for classification in self.keys():
 
          self.term_matrix[classification]= [map(lambda term: self.term_frequency(term, document.tokens),  self.terms) for document in self[classification].values()]
          frequency_sum= sum([sum(vector) for vector in self.term_matrix[classification]])
-         self.classification_matrix[classification]= [(sum(vector) + 1) / ((frequency_sum + len(self.terms)) * k) for vector in zip(*self.term_matrix[classification])]
+         self.classification_matrix[classification]= [(sum(vector) + 1) / float(frequency_sum + len(self.terms)) for vector in zip(*self.term_matrix[classification])]
          
+         print 'train', classification, self.classification_matrix[classification]
+      print "---------------------------------------------"
 
    @staticmethod
    def term_frequency(term, tokens):
@@ -68,16 +72,16 @@ class NaiveBaysenClassifier(dict):
 
       return term_frequency
 
-   def classify(self, text, id= None):
+   def classify(self, query, id= None):
 
-      document= Document(text, id, additional_stopwords= self.stopwords)
-      term_matrix= [self.term_frequency(term, document.tokens) for term in self.terms]
+      document= Document(query, id, additional_stopwords= self.stopwords)
+      query_matrix= [self.term_frequency(term, document.tokens) for term in self.terms]
 
-      probabilities= [(sum(term_matrix) * reduce(mul, self.classification_matrix[classification]), classification) for classification in self.keys()]
-      (probability, classification)= max(probabilities)
+      print 'query matrix', query_matrix
 
-      return classification
-
+      total_documents= sum([len(documents) for documents in self.values()])
+      for classification in self.keys():
+         yield (classification,  (len(self[classification]) / float(total_documents)) * reduce(mul, map(lambda p: pow(*p),  izip(self.classification_matrix[classification], query_matrix))))
 
 
 if __name__ == '__main__':
@@ -92,9 +96,17 @@ if __name__ == '__main__':
       classification= path.basename(filename).split(".")[1]
        
       fh= open(filename, 'r')
-      nbc.add(fh.read(), classification)
+      data= fh.read()
       fh.close()
 
+      print classification, data
+
+      nbc.add(data, classification)
+
    nbc.train()
-   print nbc.classify("The sky is blue")
+
+   query= "The sky had a nice shade of blue"
+   print "query:", query
+   for classification in nbc.classify(query):
+      print classification
 
