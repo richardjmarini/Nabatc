@@ -81,6 +81,7 @@ class NaiveBayesClassifier(dict):
    def train(self):
 
       print 'terms', self.terms
+
       for classification in self.keys():
 
          self.term_matrix[classification]= [map(lambda term: self.term_frequency(term, document.tokens), self.terms) for document in self[classification].values()]
