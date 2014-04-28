@@ -61,5 +61,5 @@ if __name__ == '__main__':
 
    query= "The sky had a nice shade of blue"
    print "query:", opts.query
-   for classification in nbc.classify(opts.query):
+   for classification in sorted(nbc.classify(opts.query), key= lambda c: c[1], reverse= True):
       print classification
