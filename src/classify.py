@@ -23,6 +23,7 @@
 #      along with Nabatc.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 
+from operator import itemgetter
 from optparse import OptionParser, make_option
 from glob import glob
 from os import path, pardir, curdir
@@ -61,5 +62,5 @@ if __name__ == '__main__':
 
    query= "The sky had a nice shade of blue"
    print "query:", opts.query
-   for classification in nbc.classify(opts.query):
+   for classification in sorted(nbc.classify(opts.query), key= itemgetter(1), reverse= True):
       print classification
