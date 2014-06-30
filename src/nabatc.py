@@ -29,7 +29,7 @@ from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 from hashlib import md5
 from operator import mul
-from math import pow
+from math import pow, log
 
 class Document(object):
 
@@ -107,4 +107,8 @@ class NaiveBayesClassifier(dict):
 
       total_documents= sum([len(documents) for documents in self.values()])
       for classification in self.keys():
+         # TODO: in cases where there are thousands of words within a document
+         # the computed values may become to small for the CPU to handle
+         # in these cases "underflow prevention" should be considered
+         # taking the log of the probabiliites of multiplication reduction below
          yield (classification,  (len(self[classification]) / float(total_documents)) * reduce(mul, map(lambda p: pow(*p), izip(self.classification_matrix[classification], query_matrix))))

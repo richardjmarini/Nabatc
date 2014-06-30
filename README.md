@@ -58,3 +58,8 @@ $ ./classify.py --query="rice"
 ('spanish', 0.0008503401360544216)
 ```
 
+## Resources
+http://en.wikipedia.org/wiki/Naive_Bayes_classifier
+
+http://suanpalm3.kmutnb.ac.th/teacher/FileDL/choochart82255418560.pdf
+
